@@ -70,6 +70,16 @@ const io = new Server(httpServer, {
 let clients: Client[] = [];
 let generationSnapshots: GenerationSnapshot[] = [];
 
+/*
+ * Function to cap the number of snapshots at 500
+ */
+function insertGenerationSnapshot(snapshot: GenerationSnapshot) {
+    generationSnapshots = [...generationSnapshots, snapshot];
+    if (generationSnapshots.length > 500) {
+        generationSnapshots = generationSnapshots.slice(generationSnapshots.length - 500);
+    }
+}
+
 io.of("/worker").on("connection", (socket: Socket) => {
     const client: Client = {
         id: uuidv4(),
@@ -142,7 +152,7 @@ const initiateGenerationSequence = () => {
                 generationId,
                 imageSequence,
             });
-            generationSnapshots = [...generationSnapshots, { generationId, imageSequence }];
+            insertGenerationSnapshot({ generationId, imageSequence });
             return;
         }
 
