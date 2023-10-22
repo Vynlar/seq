@@ -1,8 +1,12 @@
 const socket = io.connect('/worker'); // Connect to the server
-const userCodeTextarea = document.getElementById('user-code');
 const originalCanvas = document.getElementById('original-image');
 const processedCanvas = document.getElementById('processed-image');
 const exception = document.getElementById('exception');
+const validationError = document.getElementById('validation-error');
+
+const editor = ace.edit("user-code");
+editor.setTheme("ace/theme/monokai");
+editor.session.setMode("ace/mode/javascript");
 
 // Initialize with some sample code if there's nothing in local storage
 const sampleCode = `
@@ -18,14 +22,24 @@ const sampleCode = `
     })));
   }
 `;
-userCodeTextarea.value = sessionStorage.getItem('user-code') || sampleCode;
+editor.setValue(sessionStorage.getItem('user-code') || sampleCode)
 
-// Add an event listener to userCodeTextarea that stores the user's code in localStorage
-userCodeTextarea.addEventListener('input', () => {
+function resetCode() {
+  editor.setValue(sampleCode);
+  sessionStorage.setItem('user-code', sampleCode);
+}
+
+document.getElementById('reset-code').addEventListener('click', () => {
+  const result = confirm('Are you sure you want to reset your code?');
+  if (result) resetCode()
+});
+
+// Add an event listener to the editor that stores the user's code in localStorage
+editor.session.on('change', () => {
   socket.emit('set-ready', { isReady: false });
   updateReadyStatus(false);
-  sessionStorage.setItem('user-code', userCodeTextarea.value);
-});
+  sessionStorage.setItem('user-code', editor.getValue());
+})
 
 // Sample test images. You can replace these with real images
 const [r, g, b] = [Math.random(), Math.random(), Math.random()]
@@ -53,7 +67,7 @@ function drawImageOnCanvas(imageData, canvas) {
 
 function runUserProgram(image) {
   try {
-    const userFunction = new Function('imageData', userCodeTextarea.value + ';window.processImage = processImage;');
+    const userFunction = new Function('imageData', editor.getValue() + ';window.processImage = processImage;');
     userFunction();
     return window.processImage(image)
   } catch (e) {
@@ -74,10 +88,21 @@ document.getElementById('test-code').addEventListener('click', () => {
 document.getElementById('set-ready').addEventListener('click', () => {
   socket.emit('set-ready', { isReady: true });
   updateReadyStatus(true);
+  exception.innerHTML = '';
+  validationError.innerHTML = '';
 });
 
 function updateReadyStatus(isReady) {
-  document.getElementById('ready').innerHTML = isReady ? 'Running' : 'Not running';
+  const readyElement = document.getElementById('ready');
+  readyElement.innerHTML = isReady ? 'Running' : 'Not running';
+  if (isReady) {
+    readyElement.classList.add('text-green-600');
+    readyElement.classList.remove('text-red-600');
+  } else {
+    readyElement.classList.add('text-red-600');
+    readyElement.classList.remove('text-green-600');
+  }
+
 }
 
 socket.on('update-ready', ({ isReady }) => {
@@ -91,7 +116,7 @@ socket.on('update-ready', ({ isReady }) => {
 }
  */
 socket.on('invalid-image', (invalidReason) => {
-  exception.innerHTML = `Invalid image at (${invalidReason.coordinates[0]}, ${invalidReason.coordinates[1]}): ${invalidReason.error}`;
+  validationError.innerHTML = `Server says: Invalid image at (${invalidReason.coordinates[0]}, ${invalidReason.coordinates[1]}): ${invalidReason.error}`;
 })
 
 socket.on('process-image', (image) => {

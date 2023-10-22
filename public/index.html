@@ -6,43 +6,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Art Workshop</title>
     <style>
-        #image-display {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-        }
-
         canvas {
             border: 1px solid black;
+            image-rendering: pixelated;
+        }
+        .ace_editor {
+            height: 400px;
         }
     </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.30.0/ace.min.js" integrity="sha512-lwC0l9krGlq0b9AQ2sQ5nftG8CYsJnp35DZrNmMH5i09vPo6ZeBLV0OEyCRhSByTk1l6sV6wMa7inlMjSsQAGA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
 
 <body>
-    <h2>Write your image processing code:</h2>
-    <textarea id="user-code" rows="10" cols="50"></textarea>
-    <button id="test-code">Test Code</button>
+    <div class="max-w-screen-lg px-4 mx-auto py-16 flex flex-col gap-6">
+        <h1 class="italic font-mono text-3xl text-center tracking-widest text-blue-600">seq</h1>
+        <section aria-labelledby="editor-title">
+            <h2 class="font-bold text-lg" id="editor-title">Write your image processing code:</h2>
+            <textarea id="user-code"></textarea>
 
-    <h3>Test Results:</h3>
-    <div id="image-display">
-        <div>
-            <h4>Original</h4>
-            <canvas id="original-image"></canvas>
+            <button class="self-start px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-white font-bold" id="reset-code">Reset Code</button>
+        </section>
+
+        <section class="flex flex-col gap-4">
+            <button class="self-start px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white font-bold" id="test-code">Test Code</button>
+
+            <div class="text-red-600" id="exception"></div>
+            <div class="text-red-600" id="validation-error"></div>
+
+
+            <div class="flex">
+                <div class="flex-1">
+                    <h4>Original</h4>
+                    <canvas class="w-full" id="original-image" width="100" height="100"></canvas>
+                </div>
+                <div class="flex-1">
+                    <h4>Processed</h4>
+                    <canvas class="w-full" id="processed-image" width="100" height="100"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <div class="fixed top-0 right-0 p-4 flex gap-3 items-center rounded-bl bg-white">
+            <div id='ready' class=" font-bold">Click commit to run</div>
+
+            <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white font-bold" id="set-ready">Commit</button>
         </div>
-        <div>
-            <h4>Processed</h4>
-            <canvas id="processed-image"></canvas>
-        </div>
+
+        <script src="client.js"></script>
     </div>
-
-    <div id="exception"></div>
-
-    <div id='ready'>Not running</div>
-    <button id="set-ready">I'm Ready!</button>
-
-    <script src="client.js"></script>
 </body>
 
 </html>

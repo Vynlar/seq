@@ -1,4 +1,5 @@
 import { Server, Socket } from "socket.io";
+import fs from "fs";
 import express from "express";
 import { createServer } from "http";
 import { v4 as uuidv4 } from "uuid";
@@ -35,6 +36,36 @@ const createGrayImage = (width: number, height: number): Image => ({
     height,
     data: Array.from({ length: height }).map(() => Array.from({ length: width }).map(() => ({ r: 0.5, g: 0.5, b: 0.5 })))
 });
+
+const createRandomImage = (width: number, height: number): Image => ({
+    width,
+    height,
+    data: Array.from({ length: height }).map(() => Array.from({ length: width }).map(() => ({
+        r: Math.random(),
+        g: Math.random(),
+        b: Math.random(),
+    })))
+});
+
+const loadImageFromJSONFile = (path: string): Image => {
+    // [R, G, B][][] where R, G, B are numbers between 0 and 1
+    const imageData: [number, number, number][][] = JSON.parse(fs.readFileSync(path, 'utf8'))
+    const height = imageData.length;
+    const width = imageData[0].length;
+    const formattedImageData = imageData.map(row => row.map(([r, g, b]) => ({ r, g, b })));
+    const image = {
+        width,
+        height,
+        data: formattedImageData,
+    }
+    const [isValid, invalidReason] = validateImage(image);
+    if(!isValid) {
+        throw new Error(invalidReason.error);
+    } else {
+        console.log(`Loaded image from ${path}: ${width}x${height}`)
+    }
+    return image;
+}
 
 const getNextClient = (clients: Client[],
     clientIdsAlreadyUsed: Set<string> = new Set<string>()
@@ -106,7 +137,9 @@ io.of("/worker").on("connection", (socket: Socket) => {
     });
 });
 
-let startingImage = createGrayImage(100, 100);
+//let startingImage = createGrayImage(100, 100);
+let startingImage = loadImageFromJSONFile('blaine.json');
+//let startingImage = createRandomImage(100, 100);
 
 interface InvalidReason {
     coordinates: [number, number];
@@ -171,21 +204,26 @@ const initiateGenerationSequence = () => {
         client.socket.once("processed-image", (newImage: Image) => {
             console.log(`Received processed image from client ${client.id}`);
 
-            const [isValid, invalidReason] = validateImage(newImage);
-            if(isValid) {
-                clientIdsAlreadyUsed.add(client.id);
-                clearTimeout(timeout);
-                imageSequence.push(newImage);
+            try {
+                const [isValid, invalidReason] = validateImage(newImage);
+                if(isValid) {
+                    clientIdsAlreadyUsed.add(client.id);
+                    clearTimeout(timeout);
+                    imageSequence.push(newImage);
 
-                client.isReady = true; // Mark client as ready again
-                processImage(newImage); // Continue the sequence with the processed image
-            } else {
+                    client.isReady = true; // Mark client as ready again
+                    processImage(newImage); // Continue the sequence with the processed image
+                } else {
+                    throw new Error(invalidReason.error);
+                }
+            } catch (error: any) {
                 console.log(`Received invalid image from client ${client.id}`);
                 // Retry with the same image
                 // The current worker would have never responded so they will be marked
                 // as not ready and will not receive the image again
                 client.socket.emit('update-ready', { isReady: false });
-                client.socket.emit('invalid-image', invalidReason);
+                console.log(error)
+                client.socket.emit('invalid-image', { coordinates: [0, 0], error: error.message });
                 processImage(image);
             }
         });
