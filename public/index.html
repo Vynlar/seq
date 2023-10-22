@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Art Workshop</title>
+    <style>
+        #image-display {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+
+<body>
+    <h2>Write your image processing code:</h2>
+    <textarea id="user-code" rows="10" cols="50"></textarea>
+    <button id="test-code">Test Code</button>
+
+    <h3>Test Results:</h3>
+    <div id="image-display">
+        <div>
+            <h4>Original</h4>
+            <canvas id="original-image"></canvas>
+        </div>
+        <div>
+            <h4>Processed</h4>
+            <canvas id="processed-image"></canvas>
+        </div>
+    </div>
+
+    <div id="exception"></div>
+
+    <div id='ready'>Not running</div>
+    <button id="set-ready">I'm Ready!</button>
+
+    <script src="client.js"></script>
+</body>
+
+</html>

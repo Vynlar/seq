@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content=
+  "width=device-width, initial-scale=1.0">
+
+  <title>Admin UI - Interactive Art Workshop</title>
+  <style type="text/css">
+    .image-sequence {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .image-sequence canvas {
+        flex: 1;
+    }
+  </style>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js" type=
+  "text/javascript">
+</script>
+</head>
+
+<body>
+  <h2>Admin Control Panel</h2><button id="manual-start">Start
+  Generation Sequence</button>
+
+  <h3>Generated Image Sequence:</h3>
+
+  <div id="image-sequence"></div><script src="admin.js" type=
+  "text/javascript">
+</script>
+</body>
+</html>
