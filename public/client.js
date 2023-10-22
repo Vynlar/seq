@@ -45,7 +45,7 @@ editor.session.on('change', () => {
 const [r, g, b] = [Math.random(), Math.random(), Math.random()]
 const testImages = [
   // Here, we're generating 100x100 gray images, similar to the server, for testing purposes.
-  Array.from({ length: 100 }).map(() => Array.from({ length: 100 }).map(() => ({ r, g, b })))
+  Array.from({ length: 100 }).map(() => Array.from({ length: 100 }).map(() => ({ r, g, b }))),
 ];
 
 function drawImageOnCanvas(imageData, canvas) {
@@ -77,12 +77,16 @@ function runUserProgram(image) {
 }
 
 document.getElementById('test-code').addEventListener('click', () => {
-  const originalImageData = testImages[0]; // Pick the first test image for now
-  const originalImage = { width: 100, height: 100, data: originalImageData }
-  drawImageOnCanvas(originalImage, originalCanvas);
+  //const originalImageData = testImages[0]; // Pick the first test image for now
+  // Fetch the latest image from the server
+  socket.emit('get-image', (image) => {
+    const originalImage = image
+    drawImageOnCanvas(originalImage, originalCanvas);
 
-  const processedImage = runUserProgram(originalImage);
-  drawImageOnCanvas({ width: 100, height: 100, data: processedImage }, processedCanvas);
+    const processedImage = runUserProgram(originalImage);
+    drawImageOnCanvas({ width: 100, height: 100, data: processedImage }, processedCanvas);
+
+  });
 });
 
 document.getElementById('set-ready').addEventListener('click', () => {

@@ -111,6 +111,10 @@ function insertGenerationSnapshot(snapshot: GenerationSnapshot) {
     }
 }
 
+//let startingImage = createGrayImage(100, 100);
+let startingImage = loadImageFromJSONFile('blaine.json');
+//let startingImage = createRandomImage(100, 100);
+
 io.of("/worker").on("connection", (socket: Socket) => {
     const client: Client = {
         id: uuidv4(),
@@ -135,11 +139,11 @@ io.of("/worker").on("connection", (socket: Socket) => {
         console.log(`Client ${client.id} disconnected because of ${reason}`)
         clients = clients.filter(c => c.id !== client.id);
     });
-});
 
-//let startingImage = createGrayImage(100, 100);
-let startingImage = loadImageFromJSONFile('blaine.json');
-//let startingImage = createRandomImage(100, 100);
+    socket.on("get-image", (callback) => {
+        callback(startingImage);
+    })
+});
 
 interface InvalidReason {
     coordinates: [number, number];
