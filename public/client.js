@@ -1,4 +1,4 @@
-const socket = io.connect('http://localhost:3000/worker'); // Connect to the server
+const socket = io.connect('/worker'); // Connect to the server
 const userCodeTextarea = document.getElementById('user-code');
 const originalCanvas = document.getElementById('original-image');
 const processedCanvas = document.getElementById('processed-image');

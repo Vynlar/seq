@@ -1,4 +1,4 @@
-const socket = io.connect('http://localhost:3000/admin'); // Connect to the admin namespace
+const socket = io.connect('/admin'); // Connect to the admin namespace
 const imageSequencesContainer = document.getElementById('image-sequence');
 
 function drawImageOnCanvas(imageData, canvas) {
