@@ -26,18 +26,20 @@ socket.on('*', (event, ...args) => {
   console.log('event', event, args);
 })
 
-socket.on('generation-completed', ({ imageSequence }) => {
+socket.on('generation-completed', ({ imageSequence: compressedImageSequence }) => {
+  const imageSequence = compressedImageSequence.map(compressedImage => JSON.parse(LZString.decompressFromUTF16(compressedImage)));
+
   console.log('generation completed', imageSequence)
 
   const imageSequenceContainer = document.createElement('div');
   imageSequencesContainer.insertBefore(imageSequenceContainer, imageSequencesContainer.firstChild);
   imageSequenceContainer.classList.add('image-sequence');
 
-  for (const imageData of imageSequence) {
+  for (const image of imageSequence) {
     const canvas = document.createElement('canvas');
-    canvas.width = imageData.width;
-    canvas.height = imageData.height;
-    drawImageOnCanvas(imageData, canvas);
+    canvas.width = image.width;
+    canvas.height = image.height;
+    drawImageOnCanvas(image, canvas);
     imageSequenceContainer.appendChild(canvas);
   }
 });

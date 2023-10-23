@@ -79,8 +79,8 @@ function runUserProgram(image) {
 document.getElementById('test-code').addEventListener('click', () => {
   //const originalImageData = testImages[0]; // Pick the first test image for now
   // Fetch the latest image from the server
-  socket.emit('get-image', (image) => {
-    const originalImage = image
+  socket.emit('get-image', (compressedImage) => {
+    const originalImage = JSON.parse(LZString.decompressFromUTF16(compressedImage))
     drawImageOnCanvas(originalImage, originalCanvas);
 
     const processedImage = runUserProgram(originalImage);
@@ -123,14 +123,17 @@ socket.on('invalid-image', (invalidReason) => {
   validationError.innerHTML = `Server says: Invalid image at (${invalidReason.coordinates[0]}, ${invalidReason.coordinates[1]}): ${invalidReason.error}`;
 })
 
-socket.on('process-image', (image) => {
+socket.on('process-image', (compressedImage) => {
+  const image = JSON.parse(LZString.decompressFromUTF16(compressedImage))
   try {
     console.log(image)
-    const processedImage = runUserProgram(image);
-    socket.emit('processed-image', {
-      ...image,
-      data: processedImage
-    });
+    const processedImageData = runUserProgram(image);
+    const compressedProcessedImage = LZString.compressToUTF16(JSON.stringify(
+      {
+        ...image,
+        data: processedImageData,
+      }));
+    socket.emit('processed-image', compressedProcessedImage);
   } catch (error) {
     console.error("Error processing the image:", error);
     socket.emit('error-processing');

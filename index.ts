@@ -3,6 +3,7 @@ import fs from "fs";
 import express from "express";
 import { createServer } from "http";
 import { v4 as uuidv4 } from "uuid";
+import { compressToUTF16, decompressFromUTF16 } from 'lz-string'
 
 // Define types
 
@@ -112,8 +113,8 @@ function insertGenerationSnapshot(snapshot: GenerationSnapshot) {
 }
 
 //let startingImage = createGrayImage(100, 100);
-let startingImage = loadImageFromJSONFile('blaine.json');
-//let startingImage = createRandomImage(100, 100);
+//let startingImage = loadImageFromJSONFile('blaine.json');
+let startingImage = createRandomImage(100, 100);
 
 io.of("/worker").on("connection", (socket: Socket) => {
     const client: Client = {
@@ -141,7 +142,7 @@ io.of("/worker").on("connection", (socket: Socket) => {
     });
 
     socket.on("get-image", (callback) => {
-        callback(startingImage);
+        callback(compressToUTF16(JSON.stringify(startingImage)));
     })
 });
 
@@ -187,7 +188,9 @@ const initiateGenerationSequence = () => {
             startingImage = imageSequence[imageSequence.length - 1];
             io.of("/admin").emit("generation-completed", {
                 generationId,
-                imageSequence,
+                imageSequence: imageSequence.map(image => (
+                    compressToUTF16(JSON.stringify(image))
+                )),
             });
             insertGenerationSnapshot({ generationId, imageSequence });
             return;
@@ -195,7 +198,7 @@ const initiateGenerationSequence = () => {
 
         client.isReady = false; // Mark client as not ready for now
         console.log(`Sending image to client ${client.id}`);
-        client.socket.emit("process-image", image);
+        client.socket.emit("process-image", compressToUTF16(JSON.stringify(image)));
 
         const timeout = setTimeout(() => {
             // Retry with the same image
@@ -205,8 +208,10 @@ const initiateGenerationSequence = () => {
             processImage(image);
         }, 5000);
 
-        client.socket.once("processed-image", (newImage: Image) => {
+        client.socket.once("processed-image", (compressedImage: string) => {
             console.log(`Received processed image from client ${client.id}`);
+
+            const newImage = JSON.parse(decompressFromUTF16(compressedImage));
 
             try {
                 const [isValid, invalidReason] = validateImage(newImage);
