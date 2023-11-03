@@ -4,6 +4,10 @@ import express from "express";
 import { createServer } from "http";
 import { v4 as uuidv4 } from "uuid";
 import { compressToUTF16, decompressFromUTF16 } from 'lz-string'
+import sharp from 'sharp'
+
+// Unique id for this execution
+const executionId = uuidv4();
 
 // Define types
 
@@ -107,9 +111,47 @@ let generationSnapshots: GenerationSnapshot[] = [];
  */
 function insertGenerationSnapshot(snapshot: GenerationSnapshot) {
     generationSnapshots = [...generationSnapshots, snapshot];
+    writeSnapshotToDisk(snapshot, `./public/snapshots/${executionId}`);
     if (generationSnapshots.length > 500) {
         generationSnapshots = generationSnapshots.slice(generationSnapshots.length - 500);
     }
+}
+
+/*
+ * Write each image in each snapshot to disk.
+ * Organize into folders:
+ * 1. group by execution id
+ * 2. group by generation id
+ * 3. and finally one .png file per image
+ *
+ * This function may be called many times and should only write new snapshots to disk.
+ */
+function writeSnapshotToDisk(snapshot: GenerationSnapshot, path: string) {
+    const generationId = snapshot.generationId;
+    fs.mkdirSync(path, { recursive: true });
+    snapshot.imageSequence.forEach((image, index) => {
+        const filename = `${generationId}-${index}.png`;
+        const filepath = `${path}/${filename}`;
+        // ensure the directory exists
+
+        if (!fs.existsSync(filepath)) {
+            sharp(Buffer.from(image.data.flat().map(pixel => [pixel.r * 255, pixel.g * 255, pixel.b * 255]).flat()), {
+                raw: {
+                    width: image.width,
+                    height: image.height,
+                    channels: 3,
+                }
+            })
+                .png()
+                .toFile(filepath)
+                .then(() => {
+                    console.log(`Wrote image to ${filepath}`);
+                })
+                .catch((error) => {
+                    console.log(`Error writing image to ${filepath}: ${error}`);
+                });
+        }
+    });
 }
 
 //let startingImage = createGrayImage(100, 100);
@@ -249,6 +291,16 @@ io.of("/admin").on("connection", (socket: Socket) => {
     console.log('Admin UI connected')
     socket.on("manual-start", () => {
         initiateGenerationSequence();
+    });
+
+    // On connect, send the last 10 generation snapshots via the `generation-completed` event
+    generationSnapshots.slice(generationSnapshots.length - 10).forEach(snapshot => {
+        socket.emit("generation-completed", {
+            generationId: snapshot.generationId,
+            imageSequence: snapshot.imageSequence.map(image => (
+                compressToUTF16(JSON.stringify(image))
+            )),
+        });
     });
 });
 

@@ -25,11 +25,14 @@
 <body>
     <div class="max-w-screen-lg px-4 mx-auto py-16 flex flex-col gap-6">
         <h1 class="italic font-mono text-3xl text-center tracking-widest text-blue-600">seq</h1>
-        <section aria-labelledby="editor-title">
+        <section aria-labelledby="editor-title" class="space-y-4">
             <h2 class="font-bold text-lg" id="editor-title">Write your image processing code:</h2>
             <textarea id="user-code"></textarea>
 
-            <button class="self-start px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-white font-bold" id="reset-code">Reset Code</button>
+            <div class="flex flex-row gap-4">
+                <button class="self-start px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-white font-bold" id="reset-code">Reset Code</button>
+                <button class="self-start px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white font-bold" id="copy-prompt">Copy AI Prompt</button>
+            </div>
         </section>
 
         <section class="flex flex-col gap-4">

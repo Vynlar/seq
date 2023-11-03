@@ -8,18 +8,74 @@
 
   <title>Admin UI - Interactive Art Workshop</title>
   <style type="text/css">
-  .image-sequence {
+.image-sequence {
         display: flex;
         flex-wrap: wrap;
     }
 
+    /* Define the keyframes for the fade-in animation */
+    @keyframes fadeInAnimation {
+    0% {
+      visibility: hidden;
+      opacity: 0;
+    }
+    1% {
+      visibility: visible;
+    }
+    100% {
+      visibility: visible;
+      opacity: 1;
+    }
+    }
+
     canvas {
         image-rendering: pixelated;
+
     }
 
     .image-sequence canvas {
         flex: 1;
+        visibility: hidden; /* Initially hide the element */
+        opacity: 0; /* Initially make the element fully transparent */
+        animation: fadeInAnimation ease-in .5s; /* Animation name, easing, and duration */
+        animation-fill-mode: forwards; /* Keep the state of the last keyframe after the animation finishes */
     }
+
+    // for 50 children
+    .image-sequence > :nth-child(1) { animation-delay: 0.2s; }
+    .image-sequence > :nth-child(2) { animation-delay: 0.4s; }
+    .image-sequence > :nth-child(3) { animation-delay: 0.6s; }
+    .image-sequence > :nth-child(4) { animation-delay: 0.8s; }
+    .image-sequence > :nth-child(5) { animation-delay: 1.0s; }
+    .image-sequence > :nth-child(6) { animation-delay: 1.2s; }
+    .image-sequence > :nth-child(7) { animation-delay: 1.4s; }
+    .image-sequence > :nth-child(8) { animation-delay: 1.6s; }
+    .image-sequence > :nth-child(9) { animation-delay: 1.8s; }
+    .image-sequence > :nth-child(10) { animation-delay: 2.0s; }
+    .image-sequence > :nth-child(11) { animation-delay: 2.2s; }
+    .image-sequence > :nth-child(12) { animation-delay: 2.4s; }
+    .image-sequence > :nth-child(13) { animation-delay: 2.6s; }
+    .image-sequence > :nth-child(14) { animation-delay: 2.8s; }
+    .image-sequence > :nth-child(15) { animation-delay: 3.0s; }
+    .image-sequence > :nth-child(16) { animation-delay: 3.2s; }
+    .image-sequence > :nth-child(17) { animation-delay: 3.4s; }
+    .image-sequence > :nth-child(18) { animation-delay: 3.6s; }
+    .image-sequence > :nth-child(19) { animation-delay: 3.8s; }
+    .image-sequence > :nth-child(20) { animation-delay: 4.0s; }
+    .image-sequence > :nth-child(21) { animation-delay: 4.2s; }
+    .image-sequence > :nth-child(22) { animation-delay: 4.4s; }
+    .image-sequence > :nth-child(23) { animation-delay: 4.6s; }
+    .image-sequence > :nth-child(24) { animation-delay: 4.8s; }
+    .image-sequence > :nth-child(25) { animation-delay: 5.0s; }
+    .image-sequence > :nth-child(26) { animation-delay: 5.2s; }
+    .image-sequence > :nth-child(27) { animation-delay: 5.4s; }
+    .image-sequence > :nth-child(28) { animation-delay: 5.6s; }
+    .image-sequence > :nth-child(29) { animation-delay: 5.8s; }
+    .image-sequence > :nth-child(30) { animation-delay: 6.0s; }
+
+
+    
+    
   </style>
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js" type=
   "text/javascript">

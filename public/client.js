@@ -34,6 +34,40 @@ document.getElementById('reset-code').addEventListener('click', () => {
   if (result) resetCode()
 });
 
+// copy prompt to clickboard
+document.getElementById('copy-prompt').addEventListener('click', () => {
+  navigator.clipboard.writeText(`You are a generative artist tasked with writing a function that takes the pixel data of an image and modifies to produce a new image.
+
+Write a javascript function, \`processImage\` that receives an object of the following shape:
+\`\`\`
+{
+  width: number // number of pixels wide for the input and output
+  height: number // number of pixels tall
+  data: [number, number, number][][] // 3-tuples, RGB, ranging from 0 to 1 containing the image data
+}
+\`\`\`
+
+The function must return a modified copy of the \`data\` object representing the modified image of the same dimensions.
+
+
+Here is an example of such a function:
+\`\`\`
+// This is a sample function that inverts the image
+function processImage({ width, height, data }) {
+    return data.map(row => row.map(pixel => ({
+        r: 1 - pixel.r,
+        g: 1 - pixel.g,
+        b: 1 - pixel.b,
+    })));
+}
+\`\`\`
+
+Your collaborator has requested that you write a function that does the following to the image:
+
+<enter your prompt here>
+`);
+});
+
 // Add an event listener to the editor that stores the user's code in localStorage
 editor.session.on('change', () => {
   socket.emit('set-ready', { isReady: false });
