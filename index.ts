@@ -212,13 +212,22 @@ function validateImage(image: Image): [false, InvalidReason] | [true, null] {
     return [true, null];
 }
 
+
+let isRunning = false
+
 const initiateGenerationSequence = () => {
+    if(isRunning) {
+        console.log("Generation sequence already running");
+        return;
+    }
     console.log("Initiating generation sequence");
+    isRunning = true;
     const generationId = uuidv4();
     const imageSequence: Image[] = [];
     const clientIdsAlreadyUsed = new Set<string>();
 
     if(!hasNextClient(clients)) {
+        isRunning = false;
         console.log("No clients available, generation sequence aborted");
         return;
     }
@@ -227,6 +236,7 @@ const initiateGenerationSequence = () => {
         const client = getNextClient(clients, clientIdsAlreadyUsed);
         if (!client) {
             console.log("No clients available, generation sequence completed");
+            isRunning = false;
             startingImage = imageSequence[imageSequence.length - 1];
             io.of("/admin").emit("generation-completed", {
                 generationId,

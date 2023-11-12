@@ -18,9 +18,11 @@ function drawImageOnCanvas(imageData, canvas) {
   ctx.putImageData(imgData, 0, 0);
 }
 
+/*
 document.getElementById('manual-start').addEventListener('click', () => {
   socket.emit('manual-start');
 });
+*/
 
 socket.on('*', (event, ...args) => {
   console.log('event', event, args);
