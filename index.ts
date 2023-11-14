@@ -155,8 +155,8 @@ function writeSnapshotToDisk(snapshot: GenerationSnapshot, path: string) {
 }
 
 //let startingImage = createGrayImage(100, 100);
-//let startingImage = loadImageFromJSONFile('blaine.json');
-let startingImage = createRandomImage(100, 100);
+let startingImage = loadImageFromJSONFile('blaine.json');
+//let startingImage = createRandomImage(100, 100);
 
 io.of("/worker").on("connection", (socket: Socket) => {
     const client: Client = {
