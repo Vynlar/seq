@@ -10,18 +10,35 @@ editor.session.setMode("ace/mode/javascript");
 
 // Initialize with some sample code if there's nothing in local storage
 const sampleCode = `
-  // This is the function that will be called for each image
-  // The image is a 2D array of pixels, each pixel is an object with r, g, b values
-  // The function should return a 2D array of pixels, each pixel is an object with r, g, b values
   function processImage({ width, height, data }) {
-    // This is a sample function that inverts the image
-    return data.map(row => row.map(pixel => ({
-      r: 1 - pixel.r,
-      g: 1 - pixel.g,
-      b: 1 - pixel.b,
-    })));
+    // Initialize the new data array
+    let newData = [];
+
+    // Loop over each row
+    for (let i = 0; i < data.length; i++) {
+      // Initialize a new row
+      let newRow = [];
+
+      // Loop over each pixel in the row
+      for (let j = 0; j < data[i].length; j++) {
+        let pixel = data[i][j];
+
+        // Invert the colors of the pixel
+        newRow.push({
+          r: 1 - pixel.r,
+          g: 1 - pixel.g,
+          b: 1 - pixel.b
+        });
+      }
+
+      // Add the new row to the new data array
+      newData.push(newRow);
+    }
+
+    return newData;
   }
 `;
+
 editor.setValue(sessionStorage.getItem('user-code') || sampleCode)
 
 function resetCode() {

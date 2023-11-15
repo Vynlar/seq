@@ -39,7 +39,7 @@ interface GenerationSnapshot {
 const createGrayImage = (width: number, height: number): Image => ({
     width,
     height,
-    data: Array.from({ length: height }).map(() => Array.from({ length: width }).map(() => ({ r: 0.5, g: 0.5, b: 0.5 })))
+    data: Array.from({ length: height }).map(() => Array.from({ length: width }).map(() => ({ r: 0.2, g: 0.2, b: 0.2 })))
 });
 
 const createRandomImage = (width: number, height: number): Image => ({
@@ -110,9 +110,9 @@ let generationSnapshots: GenerationSnapshot[] = [];
  * Function to cap the number of snapshots at 500
  */
 function insertGenerationSnapshot(snapshot: GenerationSnapshot) {
-    generationSnapshots = [...generationSnapshots, snapshot];
+    generationSnapshots.push(snapshot);
     writeSnapshotToDisk(snapshot, `./public/snapshots/${executionId}`);
-    if (generationSnapshots.length > 500) {
+    if (generationSnapshots.length > 100) {
         generationSnapshots = generationSnapshots.slice(generationSnapshots.length - 500);
     }
 }
@@ -154,8 +154,8 @@ function writeSnapshotToDisk(snapshot: GenerationSnapshot, path: string) {
     });
 }
 
-//let startingImage = createGrayImage(100, 100);
-let startingImage = loadImageFromJSONFile('blaine.json');
+let startingImage = createGrayImage(100, 100);
+//let startingImage = loadImageFromJSONFile('blaine.json');
 //let startingImage = createRandomImage(100, 100);
 
 io.of("/worker").on("connection", (socket: Socket) => {
@@ -238,11 +238,12 @@ const initiateGenerationSequence = () => {
             console.log("No clients available, generation sequence completed");
             isRunning = false;
             startingImage = imageSequence[imageSequence.length - 1];
+            const repeat = (arr: any, n: any) => [].concat(...Array(n).fill(arr));
             io.of("/admin").emit("generation-completed", {
                 generationId,
-                imageSequence: imageSequence.map(image => (
+                imageSequence: repeat(imageSequence.map(image => (
                     compressToUTF16(JSON.stringify(image))
-                )),
+                )), 1),
             });
             insertGenerationSnapshot({ generationId, imageSequence });
             return;
