@@ -128,7 +128,9 @@ function runUserProgram(image) {
 }
 
 document.getElementById('test-code').addEventListener('click', () => {
-  //const originalImageData = testImages[0]; // Pick the first test image for now
+  // clear the error messages
+  exception.innerHTML = '';
+  validationError.innerHTML = '';
   // Fetch the latest image from the server
   socket.emit('get-image', (compressedImage) => {
     const originalImage = JSON.parse(LZString.decompressFromUTF16(compressedImage))
