@@ -127,6 +127,25 @@ function runUserProgram(image) {
   }
 }
 
+function validateImage(image) {
+  for (let y = 0; y < image.height; y++) {
+    const row = image.data[y];
+    for (let x = 0; x < image.width; x++) {
+      const pixel = row[x];
+      if (pixel.r < 0 || pixel.r > 1) {
+        return [false, { coordinates: [x, y], error: `Invalid red value ${pixel.r}` }];
+      }
+      if (pixel.g < 0 || pixel.g > 1) {
+        return [false, { coordinates: [x, y], error: `Invalid green value ${pixel.g}` }];
+      }
+      if (pixel.b < 0 || pixel.b > 1) {
+        return [false, { coordinates: [x, y], error: `Invalid blue value ${pixel.b}` }];
+      }
+    }
+  }
+  return [true, null];
+}
+
 document.getElementById('test-code').addEventListener('click', () => {
   // clear the error messages
   exception.innerHTML = '';
@@ -137,8 +156,16 @@ document.getElementById('test-code').addEventListener('click', () => {
     drawImageOnCanvas(originalImage, originalCanvas);
 
     const processedImage = runUserProgram(originalImage);
-    drawImageOnCanvas({ width: 100, height: 100, data: processedImage }, processedCanvas);
-
+    try {
+      const [isValid, reason] = validateImage({ width: 100, height: 100, data: processedImage });
+      if (!isValid) {
+        validationError.innerHTML = "Validation error: " + JSON.stringify(reason);
+        return
+      }
+      drawImageOnCanvas({ width: 100, height: 100, data: processedImage }, processedCanvas);
+    } catch (e) {
+      validationError.innerHTML = "Erorr validating the image: " + e;
+    }
   });
 });
 
